@@ -4,24 +4,19 @@ from glob import glob
 import numpy as np
 import Image
 
-#from image_data import ImageDataset
+
+classes = ['building', 'grass', 'tree', 'cow', 'sheep', 'sky',
+           'aeroplane', 'water', 'face', 'car', 'bicycle', 'flower',
+           'sign', 'bird', 'book', 'chair', 'road', 'cat', 'dog',
+           'body', 'boat', 'void', 'horse', 'mountain']
 
 
-#def generate_val_train_msrc(directory, random_init):
-#    import random
-#    with open(os.path.join(directory, 'images.txt')) as f:
-#        image_names = f.readlines()
-#    class_images = [[] for i in xrange(1, 9)]
-#    for image_name in image_names:
-#        class_images[int(image_name[0]) - 1].append(image_name)
-#    train_file = os.path.join(directory, 'train_%d.txt' % random_init)
-#    with open(, 'w') as train_list:
-#        val_file = os.path.join(directory, 'val_%d.txt' % random_init)
-#        with open(val_file, 'w') as val_list:
-#            for class_list in class_images:
-#                random.shuffle(class_list)
-#                train_list.writelines(class_list[:len(class_list) / 2])
-#                val_list.writelines(class_list[len(class_list) / 2:])
+colors = [[128, 0, 0], [0, 128, 0], [128, 128, 0], [0, 0, 128],
+          [0, 128, 128], [128, 128, 128], [192, 0, 0], [64, 128, 0],
+          [192, 128, 0], [64, 0, 128], [192, 0, 128], [64, 128, 128],
+          [192, 128, 128], [0, 64, 0], [128, 64, 0], [0, 192, 0],
+          [128, 64, 128], [0, 192, 128], [128, 192, 128], [64, 64, 0],
+          [192, 64, 0], [0, 0, 0], [128, 0, 128], [64, 0, 0]]
 
 
 class MSRCDataset(object):
@@ -29,10 +24,6 @@ class MSRCDataset(object):
         if directory is None:
             directory = "/home/local/datasets/MSRC_ObjCategImageDatabase_v2/"
         self.directory = directory
-        classes = ['void', 'building', 'grass', 'tree', 'cow',
-            'horse', 'sheep', 'sky', 'mountain', 'aeroplane', 'water', 'face',
-            'car', 'bicycle', 'flower', 'sign', 'bird', 'book', 'chair',
-            'road', 'cat', 'dog', 'body', 'boat']
         images = glob(os.path.join(self.directory, "Images", "*.bmp"))
         self.images = [os.path.basename(f)[:-4] for f in images]
         self.n_images = len(self.images)
@@ -40,23 +31,17 @@ class MSRCDataset(object):
         if self.n_images == 0:
             raise ValueError("no images found in directory %s", self.directory)
 
-        colors = [[0, 0, 0], [128, 0, 0], [0, 128, 0],
-            [128, 128, 0], [0, 0, 128], [128, 0, 128], [0, 128, 128],
-            [128, 128, 128], [64, 0, 0], [192, 0, 0], [64, 128, 0], [192,
-                128, 0], [64, 0, 128], [192, 0, 128], [64, 128, 128],
-            [192, 128, 128], [0, 64, 0], [128, 64, 0], [0, 192, 0], [128,
-                64, 128], [0, 192, 128], [128, 192, 128], [64, 64, 0],
-            [192, 64, 0]]
         self.convert = [99. / 1000,  587. / 1000,  114. / 1000]
         converted_colors = np.dot(np.array(colors), self.convert).tolist()
         label_dict = dict()
         if rm_mountain_horse:
             horse_idx = classes.index("horse")
             mountain_idx = classes.index("mountain")
+            void_idx = classes.index("void")
             horse_color = converted_colors[horse_idx]
             mountain_color = converted_colors[mountain_idx]
-            label_dict[horse_color] = 0
-            label_dict[mountain_color] = 0
+            label_dict[horse_color] = void_idx
+            label_dict[mountain_color] = void_idx
             converted_colors.remove(horse_color)
             converted_colors.remove(mountain_color)
             colors.pop(mountain_idx)
@@ -88,6 +73,21 @@ class MSRCDataset(object):
             val = self.label_dict[l]
             img[dp == l] = val
         return img
+
+    def get_split(self, which="train"):
+        path_prefix = os.path.dirname(os.path.realpath(__file__))
+        if which == "train":
+            files = np.loadtxt(os.path.join(path_prefix, "msrc_train.txt"),
+                               dtype=np.str)
+        elif which == "val":
+            files = np.loadtxt("msrc_validation.txt")
+        elif which == "test":
+            files = np.loadtxt("msrc_test.txt")
+        else:
+            raise ValueError("Expected 'which' to be one of 'train', 'val',"
+                             "'test', got %s." % which)
+        return [f[:-4] for f in files]
+
 
 if __name__ == "__main__":
     msrc = MSRCDataset()
