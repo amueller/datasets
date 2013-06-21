@@ -1,6 +1,7 @@
 import os
 from glob import glob
 
+from matplotlib.colors import ListedColormap
 from scipy.io import loadmat
 import numpy as np
 import Image
@@ -21,7 +22,7 @@ _colors = [[128, 0, 0], [0, 128, 0], [128, 128, 0], [0, 0, 128],
 colors = np.array(_colors)
 
 
-class MSRCDataset(object):
+class MSRC21Dataset(object):
     def __init__(self,  directory=None, rm_mountain_horse=True):
         if directory is None:
             directory = "/home/local/datasets/MSRC_ObjCategImageDatabase_v2/"
@@ -58,6 +59,8 @@ class MSRCDataset(object):
         self.n_classes = len(classes_)
         self.classes = np.array(classes_)
         self.colors = np.array(colors_)
+        self.void_label = 21
+        self.cmap = ListedColormap(self.colors)
 
     def get_images(self):
         return [self.get_image(image) for image in self.images]
@@ -82,11 +85,11 @@ class MSRCDataset(object):
             if self.n_classes == 22:
                 # removed horse and mountain
                 labels = np.arange(1, 24).tolist()
-                labels.pop(8)  # mountain
-                labels.pop(5)  # horse
+                labels.pop(7)  # mountain
+                labels.pop(4)  # horse
                 labels.append(0)
                 labels = np.array(labels)
-                label_map = np.zeros(24, dtype=np.int)
+                label_map = 21 * np.ones(24, dtype=np.int)
                 label_map[labels] = np.arange(22)
             else:
                 # don't doing this right now...
@@ -98,15 +101,10 @@ class MSRCDataset(object):
             img = mat_file['newseg']
             gt_labels = mat_file['newlabels'].ravel()
             n_segments = len(np.unique(img))
-            print(np.unique(img))
-            print(gt_labels)
             if n_segments > len(gt_labels):
                 # add void label
                 gt_labels = np.hstack([gt_labels, [0]])
             assert(n_segments == len(gt_labels))
-            print(gt_labels)
-            print(np.unique(gt_labels[img - 1]))
-            print(label_map[np.unique(gt_labels[img - 1])])
             img = label_map[gt_labels[img - 1]]
         else:
             raise ValueError("Expected ds='old' or 'new', got %s." % ds)
@@ -144,7 +142,7 @@ class MSRCDataset(object):
         global_acc = np.diag(confusion)[:-1].sum() / confusion[:-1, :].sum()
         average_acc = np.mean(per_class_acc)
         if print_results:
-            print("global: %f, average: %f" % (global_acc, average_acc))
+            print("global: %.4f, average: %.4f" % (global_acc, average_acc))
             print(["%s: %.2f" % (c, x)
                    for c, x in zip(classes, per_class_acc)])
         return {'global': global_acc, 'average': average_acc,
@@ -152,6 +150,6 @@ class MSRCDataset(object):
 
 
 if __name__ == "__main__":
-    msrc = MSRCDataset()
+    msrc = MSRC21Dataset()
     from IPython import embed
     embed()
