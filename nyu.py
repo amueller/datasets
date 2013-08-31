@@ -26,8 +26,8 @@ class NYUSegmentation(object):
         self.cmap = ListedColormap(colors)
         self.void_label = 5
 
-    def get_image(self, filename):
-        return imread(self.directory + "/input/%s.jpg" % filename)
+    def load_image(self, filename):
+        return imread(self.directory + "/input/%s_lab_image.png" % filename)
 
     def get_ground_truth(self, filename):
         image = imread(self.directory + "/prediction_all/%s_lab_image_groundTruth.png"
