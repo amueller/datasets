@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 from matplotlib.colors import ListedColormap
 from scipy.misc import imread
@@ -16,7 +18,8 @@ class PascalSegmentation(object):
                         'diningtable', 'dog', 'horse', 'motorbike', 'person',
                         'potted plant', 'sheep', 'sofa', 'train', 'tvmonitor',
                         'void']
-        colors = np.loadtxt("pascal_colors.txt")
+        path_prefix = os.path.dirname(os.path.realpath(__file__))
+        colors = np.loadtxt(os.path.join(path_prefix, "pascal_colors.txt"))
         self.cmap = ListedColormap(colors)
         self.void_label = 255
 
