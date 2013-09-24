@@ -153,3 +153,5 @@ if __name__ == "__main__":
     msrc = MSRC21Dataset()
     from IPython import embed
     embed()
+
+MSRCDataset = MSRC21Dataset
