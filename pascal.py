@@ -27,13 +27,15 @@ class PascalSegmentation(object):
         return imread(self.directory + "/JPEGImages/%s.jpg" % filename)
 
     def get_ground_truth(self, filename):
-        return imread(self.directory + "/SegmentationClass/%s.png" % filename)
+        return imread(self.directory + "/SegmentationClass/%s.png" %
+                      filename)
 
     def labels(self):
         return [self.class_num()]
 
     def get_split(self, which='train', year="2010"):
-        if which not in ["train", "val", "train1", "train2"]:
+        if which not in ["train", "val", "kTrain", "kVal", "kTest",
+                         "kTrainVal", "test", 'train1', 'train2']:
             raise ValueError("Expected 'which' to be 'train' or 'val', got %s."
                              % which)
         split_file = self.directory + "/ImageSets/Segmentation/%s.txt" % which
