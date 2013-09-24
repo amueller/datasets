@@ -9,7 +9,7 @@ from scipy.misc import imread
 data_path = "/home/data/amueller/nyu_depth_forest/fold1/"
 mapper = np.zeros(256)
 labels = np.array([0, 9, 185, 227, 255])
-mapper[labels] = np.array([4, 3, 1, 0, 2])
+mapper[labels] = np.array([4, 3, 0, 1, 2])
 #mapper[labels] = np.array([0, 2, 3, 1, 4])
 #label_colors = [0, 185, 227, 255, 9]
 
@@ -20,10 +20,10 @@ class NYUSegmentation(object):
             directory = data_path
         self.directory = directory
         self.prediction_path = directory
-        self.classes = ["prop", "wall", "furniture", "ground" , "void"]
+        self.classes = ["structure", "prop", "furniture", "ground" , "void"]
         #path_prefix = os.path.dirname(os.path.realpath(__file__))
         #colors = np.loadtxt(os.path.join(path_prefix, "pascal_colors.txt"))
-        colors = np.array([[227, 172, 0], [185, 202, 202], [255, 94, 28],
+        colors = np.array([[185, 202, 202], [227, 172, 0], [255, 94, 28],
                            [9, 68, 83], [0, 0, 0]]) / 255.
         self.cmap = ListedColormap(colors)
         self.void_label = 4
